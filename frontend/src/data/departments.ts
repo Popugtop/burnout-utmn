@@ -1,0 +1,31 @@
+export const DEPARTMENTS = [
+  'School of Computer Science',
+  'School of Natural Sciences',
+  'School of Advanced Studies',
+  'Institute of Social Sciences and Humanities',
+  'School of Law and Management',
+  'Institute of Environmental and Agricultural Biology (X-BIO)',
+  'Financial and Economic Institute',
+  'Institute of Physical Education',
+  'School of Education',
+  'Advanced Engineering School',
+  'Agricultural Institute',
+  'International School of Entrepreneurship',
+  'Other',
+];
+
+export const DEPT_SHORT: Record<string, string> = {
+  'School of Computer Science': 'SCS / ШКН',
+  'School of Natural Sciences': 'Natural Sciences',
+  'School of Advanced Studies': 'SAS',
+  'Institute of Social Sciences and Humanities': 'Social & Humanities',
+  'School of Law and Management': 'Law & Management',
+  'Institute of Environmental and Agricultural Biology (X-BIO)': 'X-BIO',
+  'Financial and Economic Institute': 'FEI / ФЭИ',
+  'Institute of Physical Education': 'Physical Education',
+  'School of Education': 'Education',
+  'Advanced Engineering School': 'AES / ПИШ',
+  'Agricultural Institute': 'Agricultural',
+  'International School of Entrepreneurship': 'Entrepreneurship',
+  'Other': 'Other',
+};

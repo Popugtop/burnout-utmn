@@ -1,0 +1,7 @@
+# Insert into existing Caddyfile
+# Replace burnout.example.com with your domain
+
+burnout.example.com {
+    reverse_proxy /api/* 127.0.0.1:3081
+    reverse_proxy 127.0.0.1:3080
+}

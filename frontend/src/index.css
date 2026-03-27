@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'DM Sans', sans-serif;
+    background-color: #0A0E1A;
+    color: #E8ECF4;
+    scroll-behavior: smooth;
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: 'Outfit', sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer utilities {
+  .grid-bg {
+    background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #E8ECF4 0%, #D55B34 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glow-orange {
+    box-shadow: 0 0 40px rgba(213, 91, 52, 0.15);
+  }
+
+  .card {
+    @apply bg-base-800 border border-base-600 rounded-xl;
+  }
+
+  .btn-primary {
+    @apply bg-accent hover:bg-accent-hover text-white font-medium px-6 py-3 rounded-xl transition-all duration-200;
+  }
+
+  .btn-secondary {
+    @apply bg-base-700 border border-base-600 hover:border-accent text-text-primary font-medium px-6 py-3 rounded-xl transition-all duration-200;
+  }
+
+  .btn-danger {
+    @apply bg-heat-critical/20 hover:bg-heat-critical/30 text-heat-critical border border-heat-critical/30 font-medium px-4 py-2 rounded-lg transition-all duration-200;
+  }
+
+  .input {
+    @apply bg-base-700 border border-base-600 focus:border-accent text-text-primary rounded-lg px-4 py-2.5 outline-none transition-colors duration-200 w-full;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0A0E1A;
+}
+::-webkit-scrollbar-thumb {
+  background: #222940;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D55B34;
+}
