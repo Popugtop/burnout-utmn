@@ -58,6 +58,40 @@
   }
 }
 
+/* ── Recharts: force dark tooltips everywhere ──────────────────────────── */
+.recharts-default-tooltip {
+  background: #131827 !important;
+  border: 1px solid #222940 !important;
+  border-radius: 8px !important;
+}
+.recharts-tooltip-item,
+.recharts-tooltip-item-name,
+.recharts-tooltip-item-value {
+  color: #E8ECF4 !important;
+}
+.recharts-tooltip-label {
+  color: #8892A8 !important;
+}
+
+/* ── Styled <select> elements ──────────────────────────────────────────── */
+select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238892A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+select.input option {
+  background: #1A2035;
+  color: #E8ECF4;
+}
+select.input option:hover,
+select.input option:checked {
+  background: #222940;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;

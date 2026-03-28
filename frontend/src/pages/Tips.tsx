@@ -1,10 +1,20 @@
-import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { TIPS, Tip } from '../data/tips';
+import { motion } from 'framer-motion';
+import { useApi } from '../hooks/useApi';
 import TipCard from '../components/TipCard';
 import ScrollReveal from '../components/ScrollReveal';
 
-const CATEGORIES: Array<{ key: Tip['category'] | 'all'; label: string }> = [
+type Category = 'academic' | 'sleep' | 'emotional' | 'social';
+
+interface Tip {
+  id: string;
+  category: Category;
+  title: string;
+  body: string;
+  source?: string;
+}
+
+const CATEGORIES: Array<{ key: Category | 'all'; label: string }> = [
   { key: 'all', label: 'All Tips' },
   { key: 'academic', label: 'Academic Load' },
   { key: 'sleep', label: 'Sleep & Energy' },
@@ -13,8 +23,12 @@ const CATEGORIES: Array<{ key: Tip['category'] | 'all'; label: string }> = [
 ];
 
 export default function Tips() {
-  const [filter, setFilter] = useState<Tip['category'] | 'all'>('all');
-  const filtered = filter === 'all' ? TIPS : TIPS.filter(t => t.category === filter);
+  const [filter, setFilter] = useState<Category | 'all'>('all');
+  const { data: tips, loading } = useApi<Tip[]>('/api/content/tips');
+
+  const filtered = tips
+    ? (filter === 'all' ? tips : tips.filter(t => t.category === filter))
+    : [];
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
@@ -22,7 +36,6 @@ export default function Tips() {
         <h1 className="font-display text-5xl font-bold mb-2">Tips & Resources</h1>
         <p className="text-text-secondary mb-10">Evidence-based strategies to reduce academic burnout</p>
 
-        {/* Filter tabs */}
         <div className="flex flex-wrap gap-2 mb-10">
           {CATEGORIES.map(cat => (
             <button
@@ -38,6 +51,8 @@ export default function Tips() {
             </button>
           ))}
         </div>
+
+        {loading && <div className="text-text-muted animate-pulse">Loading tips...</div>}
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filtered.map((tip, i) => (

@@ -34,11 +34,11 @@ export default function Dashboard() {
   const setFilter = (k: string, v: string) => setFilters(f => ({ ...f, [k]: v }));
 
   const pieData = stats ? [
-    { name: 'Low', value: stats.distribution.low },
-    { name: 'Mild', value: stats.distribution.mild },
-    { name: 'Moderate', value: stats.distribution.moderate },
-    { name: 'High', value: stats.distribution.high },
-    { name: 'Critical', value: stats.distribution.critical },
+    { name: 'Low', value: (stats.distribution.low || 0) },
+    { name: 'Mild', value: (stats.distribution.mild || 0) },
+    { name: 'Moderate', value: (stats.distribution.moderate || 0) },
+    { name: 'High', value: (stats.distribution.high || 0) },
+    { name: 'Critical', value: (stats.distribution.critical || 0) },
   ] : [];
 
   const radarData = stats ? [
@@ -117,7 +117,7 @@ export default function Dashboard() {
             />
             <StatCard
               label="Critical Cases"
-              value={<AnimatedCounter target={stats.distribution.critical} />}
+              value={<AnimatedCounter target={stats.distribution.critical || 0} />}
               sub="Score > 80"
             />
           </div>
@@ -133,7 +133,7 @@ export default function Dashboard() {
           </ScrollReveal>
         )}
 
-        {stats && (
+        {stats && stats.total > 0 && (
           <div className="grid lg:grid-cols-2 gap-6 mb-8">
             {/* Bar: by course year */}
             <ScrollReveal>

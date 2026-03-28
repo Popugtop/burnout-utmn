@@ -47,21 +47,21 @@ router.get('/', (req: Request, res: Response) => {
   // Distribution
   const distribution = db.prepare(`
     SELECT
-      SUM(CASE WHEN score_total <= 20 THEN 1 ELSE 0 END) as low,
-      SUM(CASE WHEN score_total > 20 AND score_total <= 40 THEN 1 ELSE 0 END) as mild,
-      SUM(CASE WHEN score_total > 40 AND score_total <= 60 THEN 1 ELSE 0 END) as moderate,
-      SUM(CASE WHEN score_total > 60 AND score_total <= 80 THEN 1 ELSE 0 END) as high,
-      SUM(CASE WHEN score_total > 80 THEN 1 ELSE 0 END) as critical
+      COALESCE(SUM(CASE WHEN score_total <= 20 THEN 1 ELSE 0 END), 0) as low,
+      COALESCE(SUM(CASE WHEN score_total > 20 AND score_total <= 40 THEN 1 ELSE 0 END), 0) as mild,
+      COALESCE(SUM(CASE WHEN score_total > 40 AND score_total <= 60 THEN 1 ELSE 0 END), 0) as moderate,
+      COALESCE(SUM(CASE WHEN score_total > 60 AND score_total <= 80 THEN 1 ELSE 0 END), 0) as high,
+      COALESCE(SUM(CASE WHEN score_total > 80 THEN 1 ELSE 0 END), 0) as critical
     FROM responses ${where}
   `).get(...params);
 
   // Category averages
   const categories = db.prepare(`
     SELECT
-      AVG(score_academic) as academic,
-      AVG(score_sleep) as sleep,
-      AVG(score_emotional) as emotional,
-      AVG(score_social) as social
+      COALESCE(AVG(score_academic), 0) as academic,
+      COALESCE(AVG(score_sleep), 0) as sleep,
+      COALESCE(AVG(score_emotional), 0) as emotional,
+      COALESCE(AVG(score_social), 0) as social
     FROM responses ${where}
   `).get(...params) as { academic: number; sleep: number; emotional: number; social: number };
 

@@ -1,6 +1,13 @@
 import { Router, Request, Response } from 'express';
 import { getDb } from '../database';
 import { v4 as uuidv4 } from 'uuid';
+import { addAuditLog } from '../utils/audit';
+import { AuthRequest } from '../middleware/auth';
+
+function getClientIp(req: Request): string {
+  const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.socket.remoteAddress || '';
+  return ip === '::1' ? '127.0.0.1' : ip.replace(/^::ffff:/, '');
+}
 
 const router = Router();
 
@@ -46,13 +53,16 @@ router.delete('/surveys/:id', (req: Request, res: Response) => {
   res.json({ ok: true });
 });
 
-router.put('/surveys/:id/activate', (req: Request, res: Response) => {
+router.put('/surveys/:id/activate', (req: AuthRequest, res: Response) => {
   const db = getDb();
   const t = db.transaction(() => {
     db.prepare('UPDATE surveys SET is_active = 0').run();
     db.prepare('UPDATE surveys SET is_active = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(req.params.id);
   });
   t();
+  if (req.adminId) {
+    addAuditLog(req.adminId, 'activate_survey', { survey_id: req.params.id }, getClientIp(req));
+  }
   res.json({ ok: true });
 });
 
@@ -153,11 +163,33 @@ router.get('/responses/export', (_req: Request, res: Response) => {
   res.send(csv);
 });
 
-router.delete('/responses/:id', (req: Request, res: Response) => {
+router.delete('/responses/:id', (req: AuthRequest, res: Response) => {
   const db = getDb();
   db.prepare('DELETE FROM response_answers WHERE response_id = ?').run(req.params.id);
   db.prepare('DELETE FROM responses WHERE id = ?').run(req.params.id);
+  if (req.adminId) {
+    addAuditLog(req.adminId, 'delete_response', { response_id: req.params.id }, getClientIp(req));
+  }
   res.json({ ok: true });
+});
+
+// GET /api/admin/audit-log
+router.get('/audit-log', (req: Request, res: Response) => {
+  const db = getDb();
+  const page = parseInt(req.query.page as string || '1', 10);
+  const limit = 50;
+  const offset = (page - 1) * limit;
+
+  const total = (db.prepare('SELECT COUNT(*) as cnt FROM admin_audit_log').get() as { cnt: number }).cnt;
+  const rows = db.prepare(`
+    SELECT al.*, a.username, a.display_name
+    FROM admin_audit_log al
+    LEFT JOIN admins a ON al.admin_id = a.id
+    ORDER BY al.created_at DESC
+    LIMIT ? OFFSET ?
+  `).all(limit, offset);
+
+  res.json({ total, rows });
 });
 
 export default router;
