@@ -1,5 +1,6 @@
 FROM node:20-alpine
-RUN apk add --no-cache python3 make g++
+RUN --mount=type=cache,target=/var/cache/apk \
+    apk add --update python3 make g++
 WORKDIR /app
 COPY package*.json ./
 RUN --mount=type=cache,target=/root/.npm \
