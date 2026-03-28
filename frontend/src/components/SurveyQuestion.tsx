@@ -45,26 +45,28 @@ export default function SurveyQuestionUI({ question, current, total, value, onCh
 
       {/* Answers */}
       {question.question_type === 'scale_1_5' && (
-        <div className="space-y-3 mb-8">
-          {[1, 2, 3, 4, 5].map(n => (
-            <button
-              key={n}
-              onClick={() => onChange(String(n))}
-              className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 text-left
-                ${value === String(n)
-                  ? 'border-accent bg-accent-light text-text-primary'
-                  : 'border-base-600 bg-base-800 text-text-secondary hover:border-accent/50 hover:bg-base-700'
-                }`}
-            >
-              <span className={`w-8 h-8 rounded-full border-2 flex items-center justify-center font-mono text-sm font-medium flex-shrink-0
-                ${value === String(n) ? 'border-accent text-accent' : 'border-base-600 text-text-muted'}`}>
+        <div className="mb-8">
+          <div className="flex gap-3 mb-3">
+            {[1, 2, 3, 4, 5].map(n => (
+              <button
+                key={n}
+                onClick={() => onChange(String(n))}
+                className={`flex-1 aspect-square rounded-xl border-2 flex items-center justify-center font-mono text-lg font-semibold transition-all duration-200
+                  ${value === String(n)
+                    ? 'border-accent bg-accent-light text-accent scale-105'
+                    : 'border-base-600 bg-base-800 text-text-muted hover:border-accent/50 hover:text-text-primary'
+                  }`}
+              >
                 {n}
-              </span>
-              <span className="text-sm text-text-muted">
-                {n === 1 ? question.scale_label_low : n === 5 ? question.scale_label_high : ''}
-              </span>
-            </button>
-          ))}
+              </button>
+            ))}
+          </div>
+          {(question.scale_label_low || question.scale_label_high) && (
+            <div className="flex justify-between text-xs text-text-muted px-1">
+              <span>{question.scale_label_low}</span>
+              <span>{question.scale_label_high}</span>
+            </div>
+          )}
         </div>
       )}
 

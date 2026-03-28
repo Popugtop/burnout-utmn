@@ -5,6 +5,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      cache_from:
+        - burnout-frontend:latest
     container_name: burnout-frontend
     restart: unless-stopped
     ports:
@@ -16,6 +18,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      cache_from:
+        - burnout-backend:latest
     container_name: burnout-backend
     restart: unless-stopped
     ports:
