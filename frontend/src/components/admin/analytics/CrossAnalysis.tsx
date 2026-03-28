@@ -3,8 +3,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 interface Props {
   data: CrossAnalysisRow[];
-  groupBy: 'course' | 'department' | 'period';
-  onGroupByChange: (g: 'course' | 'department' | 'period') => void;
+  groupBy: 'course' | 'department';
+  onGroupByChange: (g: 'course' | 'department') => void;
 }
 
 function heatColor(score: number) {
@@ -29,7 +29,7 @@ export default function CrossAnalysis({ data, groupBy, onGroupByChange }: Props)
       <div className="flex items-center justify-between mb-5">
         <h3 className="font-display text-lg font-semibold">Cross Analysis</h3>
         <div className="flex gap-1">
-          {(['course', 'department', 'period'] as const).map(g => (
+          {(['course', 'department'] as const).map(g => (
             <button key={g} onClick={() => onGroupByChange(g)}
               className={`px-3 py-1 rounded text-xs capitalize transition-colors ${groupBy === g ? 'bg-accent/20 text-accent' : 'text-text-muted hover:text-text-primary'}`}>
               By {g}

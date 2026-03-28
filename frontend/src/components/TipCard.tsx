@@ -27,12 +27,12 @@ interface Props {
 export default function TipCard({ tip }: Props) {
   const color = CATEGORY_COLORS[tip.category] || '#8892A8';
   return (
-    <div className="card p-5 hover:border-base-600/80 transition-all duration-200" style={{ borderColor: `${color}40` }}>
+    <div className="card p-5 hover:border-base-600/80 transition-all duration-200 h-full flex flex-col" style={{ borderColor: `${color}40` }}>
       <div className="flex items-start gap-3 mb-3">
         <span className="text-2xl">{CATEGORY_ICONS[tip.category] || '💡'}</span>
         <h3 className="font-display text-lg font-semibold text-text-primary">{tip.title}</h3>
       </div>
-      <p className="text-text-secondary text-sm leading-relaxed mb-3">{tip.body}</p>
+      <p className="text-text-secondary text-sm leading-relaxed mb-3 flex-1">{tip.body}</p>
       {tip.source && (
         <p className="text-text-muted text-xs italic border-t border-base-600 pt-2">{tip.source}</p>
       )}

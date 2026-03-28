@@ -54,9 +54,9 @@ export default function Tips() {
 
         {loading && <div className="text-text-muted animate-pulse">Loading tips...</div>}
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 items-start">
           {filtered.map((tip, i) => (
-            <ScrollReveal key={tip.id} delay={i * 0.05}>
+            <ScrollReveal key={tip.id} delay={i * 0.05} className="h-full">
               <TipCard tip={tip} />
             </ScrollReveal>
           ))}

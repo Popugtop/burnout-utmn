@@ -14,7 +14,6 @@ export const submitSurveySchema = z.object({
   survey_id: z.string().uuid(),
   course_year: z.number().int().min(1).max(5),
   department: z.string().min(1).max(200),
-  semester_period: z.enum(['Beginning of semester', 'Mid-semester', 'Exam period', 'Between semesters']),
   answers: z.array(z.object({
     question_id: z.string().uuid(),
     value: z.string().min(1).max(100),

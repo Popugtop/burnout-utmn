@@ -1,8 +1,6 @@
 import { AnalyticsFilters } from '../../../types';
 import { DEPARTMENTS } from '../../../data/departments';
 
-const PERIODS = ['Beginning of semester', 'Mid-semester', 'Exam period', 'Between semesters'];
-
 interface Props {
   filters: AnalyticsFilters;
   onChange: (f: AnalyticsFilters) => void;
@@ -13,7 +11,7 @@ export default function AnalyticsFiltersPanel({ filters, onChange }: Props) {
     onChange({ ...filters, [key]: value });
 
   const hasFilters = filters.date_from || filters.date_to || filters.course_years ||
-    filters.departments || filters.periods || !filters.exclude_suspicious;
+    filters.departments || !filters.exclude_suspicious;
 
   return (
     <div className="card p-4 mb-6 space-y-3">
@@ -42,13 +40,6 @@ export default function AnalyticsFiltersPanel({ filters, onChange }: Props) {
             {DEPARTMENTS.map(d => <option key={d} value={d}>{d.split(' ').slice(-1)[0]}</option>)}
           </select>
         </div>
-        <div>
-          <label className="block text-text-muted text-xs mb-1">Period</label>
-          <select value={filters.periods} onChange={e => set('periods', e.target.value)} className="input text-sm w-40">
-            <option value="">All periods</option>
-            {PERIODS.map(p => <option key={p} value={p}>{p}</option>)}
-          </select>
-        </div>
         <label className="flex items-center gap-2 text-text-secondary text-sm cursor-pointer">
           <input type="checkbox" checked={filters.exclude_suspicious}
             onChange={e => set('exclude_suspicious', e.target.checked)}
@@ -56,7 +47,7 @@ export default function AnalyticsFiltersPanel({ filters, onChange }: Props) {
           Exclude suspicious
         </label>
         {hasFilters && (
-          <button onClick={() => onChange({ date_from: '', date_to: '', course_years: '', departments: '', periods: '', exclude_suspicious: true })}
+          <button onClick={() => onChange({ date_from: '', date_to: '', course_years: '', departments: '', exclude_suspicious: true })}
             className="text-accent text-sm hover:underline">
             Reset
           </button>

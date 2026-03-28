@@ -30,7 +30,6 @@ export interface SurveyAnswer {
 export interface SurveyMeta {
   course_year: number;
   department: string;
-  semester_period: string;
 }
 
 export interface SubmitPayload extends SurveyMeta {
@@ -52,7 +51,6 @@ export interface SurveyResult {
   created_at: string;
   course_year: number;
   department: string;
-  semester_period: string;
   score_academic: number;
   score_sleep: number;
   score_emotional: number;
@@ -73,7 +71,6 @@ export interface StatsResponse {
   };
   byDepartment: Array<{ department: string; avg_total: number; count: number }>;
   byCourse: Array<{ course_year: number; avg_total: number; count: number }>;
-  byPeriod: Array<{ semester_period: string; avg_total: number; count: number }>;
   categories: { academic: number; sleep: number; emotional: number; social: number };
 }
 
@@ -117,7 +114,6 @@ export interface AnalyticsFilters {
   date_to: string;
   course_years: string;
   departments: string;
-  periods: string;
   exclude_suspicious: boolean;
 }
 
@@ -168,7 +164,6 @@ export interface TimelinePoint {
 export interface DemographicsData {
   by_course: Array<{ label: string | number; count: number }>;
   by_department: Array<{ label: string; count: number }>;
-  by_period: Array<{ label: string; count: number }>;
   by_date: Array<{ label: string; count: number }>;
 }
 
@@ -178,7 +173,6 @@ export interface AdminResponse {
   created_at: string;
   course_year: number;
   department: string;
-  semester_period: string;
   score_academic: number;
   score_sleep: number;
   score_emotional: number;

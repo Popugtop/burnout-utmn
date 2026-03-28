@@ -60,12 +60,8 @@ export default function SurveyQuestionUI({ question, current, total, value, onCh
                 ${value === String(n) ? 'border-accent text-accent' : 'border-base-600 text-text-muted'}`}>
                 {n}
               </span>
-              <span className="text-sm">
-                {n === 1 && question.scale_label_low}
-                {n === 5 && question.scale_label_high}
-                {n === 2 && 'Rarely'}
-                {n === 3 && 'Sometimes'}
-                {n === 4 && 'Often'}
+              <span className="text-sm text-text-muted">
+                {n === 1 ? question.scale_label_low : n === 5 ? question.scale_label_high : ''}
               </span>
             </button>
           ))}

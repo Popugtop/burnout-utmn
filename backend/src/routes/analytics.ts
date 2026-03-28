@@ -7,7 +7,7 @@ function buildWhere(query: Record<string, unknown>): { where: string; params: (s
   let where = 'WHERE 1=1';
   const params: (string | number)[] = [];
 
-  const { date_from, date_to, course_years, departments, periods, exclude_suspicious } = query;
+  const { date_from, date_to, course_years, departments, exclude_suspicious } = query;
 
   if (date_from) { where += ' AND date(created_at) >= ?'; params.push(String(date_from)); }
   if (date_to) { where += ' AND date(created_at) <= ?'; params.push(String(date_to)); }
@@ -24,14 +24,6 @@ function buildWhere(query: Record<string, unknown>): { where: string; params: (s
     const vals = String(departments).split(',').map(s => s.trim()).filter(Boolean);
     if (vals.length > 0) {
       where += ` AND department IN (${vals.map(() => '?').join(',')})`;
-      params.push(...vals);
-    }
-  }
-
-  if (periods) {
-    const vals = String(periods).split('|').map(s => s.trim()).filter(Boolean);
-    if (vals.length > 0) {
-      where += ` AND semester_period IN (${vals.map(() => '?').join(',')})`;
       params.push(...vals);
     }
   }
@@ -169,7 +161,7 @@ router.get('/cross', (req: Request, res: Response) => {
   const { where, params } = buildWhere(req.query as Record<string, unknown>);
   const groupBy = req.query.group_by as string || 'course';
 
-  const groupCol = groupBy === 'department' ? 'department' : groupBy === 'period' ? 'semester_period' : 'course_year';
+  const groupCol = groupBy === 'department' ? 'department' : 'course_year';
 
   const rows = db.prepare(`
     SELECT
@@ -237,12 +229,6 @@ router.get('/demographics', (req: Request, res: Response) => {
     GROUP BY department ORDER BY count DESC
   `).all(...params);
 
-  const byPeriod = db.prepare(`
-    SELECT semester_period as label, COUNT(*) as count
-    FROM responses ${where}
-    GROUP BY semester_period
-  `).all(...params);
-
   const byDate = db.prepare(`
     SELECT strftime('%Y-%m-%d', created_at) as label, COUNT(*) as count
     FROM responses ${where}
@@ -250,7 +236,7 @@ router.get('/demographics', (req: Request, res: Response) => {
     ORDER BY label ASC
   `).all(...params);
 
-  res.json({ by_course: byCourse, by_department: byDept, by_period: byPeriod, by_date: byDate });
+  res.json({ by_course: byCourse, by_department: byDept, by_date: byDate });
 });
 
 // GET /api/admin/analytics/export/csv

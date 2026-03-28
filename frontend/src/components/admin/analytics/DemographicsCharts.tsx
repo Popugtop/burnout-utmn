@@ -29,14 +29,12 @@ export default function DemographicsCharts({ data }: Props) {
     name: String(d.label).split(' ').slice(-1)[0],
     count: d.count,
   }));
-  const periodData = data.by_period.map(d => ({ name: String(d.label).split(' ').slice(0,2).join(' '), value: d.count }));
 
   return (
     <div className="mb-6">
       <h3 className="font-display text-lg font-semibold mb-4">Demographics</h3>
-      <div className="grid lg:grid-cols-3 gap-4 mb-4">
+      <div className="grid lg:grid-cols-2 gap-4 mb-4">
         <SimplePie title="By Course Year" data={courseData.map(d => ({label: d.name, count: d.value}))} />
-        <SimplePie title="By Semester Period" data={periodData.map(d => ({label: d.name, count: d.value}))} />
         <div className="card p-5">
           <h4 className="font-display text-base font-semibold mb-3">By Department (top 8)</h4>
           <ResponsiveContainer width="100%" height={180}>

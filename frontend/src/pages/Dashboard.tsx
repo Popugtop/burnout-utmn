@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis,
-  LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid,
+  PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 import { useApi } from '../hooks/useApi';
@@ -13,8 +13,6 @@ import AnimatedCounter from '../components/AnimatedCounter';
 import ScrollReveal from '../components/ScrollReveal';
 import { DEPARTMENTS } from '../data/departments';
 
-const PERIODS = ['Beginning of semester', 'Mid-semester', 'Exam period', 'Between semesters'];
-
 function buildUrl(base: string, params: Record<string, string>) {
   const q = Object.entries(params).filter(([, v]) => v && v !== 'all').map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
   return q ? `${base}?${q}` : base;
@@ -23,10 +21,10 @@ function buildUrl(base: string, params: Record<string, string>) {
 const PIE_COLORS = ['#34D5A0', '#2A5A6A', '#C47A30', '#D55B34', '#E84430'];
 
 export default function Dashboard() {
-  const [filters, setFilters] = useState({ year: 'all', department: 'all', period: 'all' });
+  const [filters, setFilters] = useState({ year: 'all', department: 'all' });
 
   const statsUrl = buildUrl('/api/stats', filters);
-  const heatmapUrl = buildUrl('/api/stats/heatmap', { year: filters.year, period: filters.period });
+  const heatmapUrl = buildUrl('/api/stats/heatmap', { year: filters.year });
 
   const { data: stats, loading, error } = useApi<StatsResponse>(statsUrl);
   const { data: heatmap } = useApi<HeatmapRow[]>(heatmapUrl);
@@ -54,11 +52,6 @@ export default function Dashboard() {
     count: r.count,
   })) || [];
 
-  const lineData = stats?.byPeriod.map(r => ({
-    period: r.semester_period.split(' ').slice(0, 2).join(' '),
-    score: Math.round(r.avg_total),
-  })) || [];
-
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -79,13 +72,8 @@ export default function Dashboard() {
             {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
           </select>
 
-          <select value={filters.period} onChange={e => setFilter('period', e.target.value)} className="input w-auto text-sm">
-            <option value="all">All periods</option>
-            {PERIODS.map(p => <option key={p} value={p}>{p}</option>)}
-          </select>
-
           {Object.values(filters).some(v => v !== 'all') && (
-            <button onClick={() => setFilters({ year: 'all', department: 'all', period: 'all' })}
+            <button onClick={() => setFilters({ year: 'all', department: 'all' })}
               className="text-accent text-sm hover:underline">Clear filters</button>
           )}
         </div>
@@ -134,69 +122,57 @@ export default function Dashboard() {
         )}
 
         {stats && stats.total > 0 && (
-          <div className="grid lg:grid-cols-2 gap-6 mb-8">
-            {/* Bar: by course year */}
-            <ScrollReveal>
-              <div className="card p-6">
-                <h2 className="font-display text-xl font-semibold mb-6">Average Score by Year</h2>
-                <ResponsiveContainer width="100%" height={240}>
-                  <BarChart data={barData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#222940" />
-                    <XAxis dataKey="course" tick={{ fill: '#8892A8', fontSize: 12 }} />
-                    <YAxis domain={[0, 100]} tick={{ fill: '#8892A8', fontSize: 12 }} />
-                    <Tooltip contentStyle={{ background: '#131827', border: '1px solid #222940', borderRadius: 8, color: '#E8ECF4' }} />
-                    <Bar dataKey="score" fill="#D55B34" radius={[4,4,0,0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </ScrollReveal>
+          <>
+            <div className="grid lg:grid-cols-2 gap-6 mb-6">
+              {/* Bar: by course year */}
+              <ScrollReveal>
+                <div className="card p-6">
+                  <h2 className="font-display text-xl font-semibold mb-6">Average Score by Year</h2>
+                  <ResponsiveContainer width="100%" height={240}>
+                    <BarChart data={barData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#222940" />
+                      <XAxis dataKey="course" tick={{ fill: '#8892A8', fontSize: 12 }} />
+                      <YAxis domain={[0, 100]} tick={{ fill: '#8892A8', fontSize: 12 }} />
+                      <Tooltip contentStyle={{ background: '#131827', border: '1px solid #222940', borderRadius: 8, color: '#E8ECF4' }} />
+                      <Bar dataKey="score" fill="#D55B34" radius={[4,4,0,0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </ScrollReveal>
 
-            {/* Radar: category profile */}
-            <ScrollReveal delay={0.1}>
-              <div className="card p-6">
-                <h2 className="font-display text-xl font-semibold mb-6">Burnout Profile</h2>
-                <ResponsiveContainer width="100%" height={240}>
-                  <RadarChart data={radarData}>
-                    <PolarGrid stroke="#222940" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#8892A8', fontSize: 12 }} />
-                    <Radar dataKey="score" stroke="#D55B34" fill="#D55B34" fillOpacity={0.2} />
-                    <Tooltip contentStyle={{ background: '#131827', border: '1px solid #222940', borderRadius: 8, color: '#E8ECF4' }} />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-            </ScrollReveal>
+              {/* Radar: category profile */}
+              <ScrollReveal delay={0.1}>
+                <div className="card p-6">
+                  <h2 className="font-display text-xl font-semibold mb-6">Burnout Profile</h2>
+                  <ResponsiveContainer width="100%" height={240}>
+                    <RadarChart data={radarData}>
+                      <PolarGrid stroke="#222940" />
+                      <PolarAngleAxis dataKey="subject" tick={{ fill: '#8892A8', fontSize: 12 }} />
+                      <Radar dataKey="score" stroke="#D55B34" fill="#D55B34" fillOpacity={0.2} />
+                      <Tooltip contentStyle={{ background: '#131827', border: '1px solid #222940', borderRadius: 8, color: '#E8ECF4' }} />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
+              </ScrollReveal>
+            </div>
 
-            {/* Pie: distribution */}
-            <ScrollReveal delay={0.1}>
-              <div className="card p-6">
-                <h2 className="font-display text-xl font-semibold mb-6">Burnout Level Distribution</h2>
-                <ResponsiveContainer width="100%" height={240}>
-                  <PieChart>
-                    <Pie data={pieData} cx="50%" cy="50%" outerRadius={75} dataKey="value" label={({ name, percent }) => percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : ''} labelLine={false}>
-                      {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i]} />)}
-                    </Pie>
-                    <Tooltip contentStyle={{ background: '#131827', border: '1px solid #222940', borderRadius: 8, color: '#E8ECF4' }} itemStyle={{ color: '#E8ECF4' }} labelStyle={{ color: '#E8ECF4' }} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </ScrollReveal>
-
-            {/* Line: by period */}
-            <ScrollReveal delay={0.2}>
-              <div className="card p-6">
-                <h2 className="font-display text-xl font-semibold mb-6">Score by Semester Period</h2>
-                <ResponsiveContainer width="100%" height={240}>
-                  <LineChart data={lineData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#222940" />
-                    <XAxis dataKey="period" tick={{ fill: '#8892A8', fontSize: 11 }} />
-                    <YAxis domain={[0, 100]} tick={{ fill: '#8892A8', fontSize: 12 }} />
-                    <Tooltip contentStyle={{ background: '#131827', border: '1px solid #222940', borderRadius: 8, color: '#E8ECF4' }} />
-                    <Line type="monotone" dataKey="score" stroke="#D55B34" strokeWidth={2} dot={{ fill: '#D55B34', r: 4 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </ScrollReveal>
-          </div>
+            {/* Pie: distribution — centered */}
+            <div className="flex justify-center mb-8">
+              <ScrollReveal delay={0.1} className="w-full lg:w-1/2">
+                <div className="card p-6">
+                  <h2 className="font-display text-xl font-semibold mb-6">Burnout Level Distribution</h2>
+                  <ResponsiveContainer width="100%" height={240}>
+                    <PieChart>
+                      <Pie data={pieData} cx="50%" cy="50%" outerRadius={75} dataKey="value" label={({ name, percent }) => percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : ''} labelLine={false}>
+                        {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i]} />)}
+                      </Pie>
+                      <Tooltip contentStyle={{ background: '#131827', border: '1px solid #222940', borderRadius: 8, color: '#E8ECF4' }} itemStyle={{ color: '#E8ECF4' }} labelStyle={{ color: '#E8ECF4' }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </ScrollReveal>
+            </div>
+          </>
         )}
 
         {stats && stats.total === 0 && (

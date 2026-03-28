@@ -11,7 +11,7 @@ import TimelineChart from './TimelineChart';
 import ResponseDetailModal from './ResponseDetailModal';
 
 const DEFAULT_FILTERS: AnalyticsFilters = {
-  date_from: '', date_to: '', course_years: '', departments: '', periods: '', exclude_suspicious: true,
+  date_from: '', date_to: '', course_years: '', departments: '', exclude_suspicious: true,
 };
 
 function filtersToQuery(f: AnalyticsFilters): string {
@@ -20,7 +20,6 @@ function filtersToQuery(f: AnalyticsFilters): string {
   if (f.date_to) p.push(`date_to=${f.date_to}`);
   if (f.course_years) p.push(`course_years=${encodeURIComponent(f.course_years)}`);
   if (f.departments) p.push(`departments=${encodeURIComponent(f.departments)}`);
-  if (f.periods) p.push(`periods=${encodeURIComponent(f.periods)}`);
   if (f.exclude_suspicious) p.push('exclude_suspicious=true');
   return p.join('&');
 }
@@ -30,7 +29,7 @@ type AnalyticsSection = 'summary' | 'categories' | 'cross' | 'timeline' | 'demog
 export default function AnalyticsDashboard() {
   const [filters, setFilters] = useState<AnalyticsFilters>(DEFAULT_FILTERS);
   const [section, setSection] = useState<AnalyticsSection>('summary');
-  const [crossGroupBy, setCrossGroupBy] = useState<'course' | 'department' | 'period'>('course');
+  const [crossGroupBy, setCrossGroupBy] = useState<'course' | 'department'>('course');
 
   const [stats, setStats] = useState<CategoryStats | null>(null);
   const [summary, setSummary] = useState<QuestionSummaryItem[] | null>(null);
@@ -159,7 +158,7 @@ export default function AnalyticsDashboard() {
       {section === 'categories' && stats && <CategoryBreakdown stats={stats} />}
 
       {section === 'cross' && cross && (
-        <CrossAnalysis data={cross} groupBy={crossGroupBy} onGroupByChange={g => { setCrossGroupBy(g); setCross(null); }} />
+        <CrossAnalysis data={cross} groupBy={crossGroupBy} onGroupByChange={(g) => { setCrossGroupBy(g); setCross(null); }} />
       )}
 
       {section === 'timeline' && timeline && <TimelineChart data={timeline} />}
@@ -176,7 +175,6 @@ export default function AnalyticsDashboard() {
                     { key: 'created_at', label: 'Date' },
                     { key: 'course_year', label: 'Year' },
                     { key: null, label: 'Department' },
-                    { key: null, label: 'Period' },
                     { key: 'score_total', label: 'Total' },
                     { key: 'score_academic', label: 'Academic' },
                     { key: 'score_sleep', label: 'Sleep' },
@@ -198,7 +196,6 @@ export default function AnalyticsDashboard() {
                     <td className="py-2.5 pr-3 text-text-muted text-xs font-mono">{new Date(row.created_at).toLocaleDateString()}</td>
                     <td className="py-2.5 pr-3 text-text-secondary">{row.course_year}</td>
                     <td className="py-2.5 pr-3 text-text-secondary truncate max-w-[100px]" title={row.department}>{row.department?.split(' ').slice(-1)[0]}</td>
-                    <td className="py-2.5 pr-3 text-text-muted text-xs">{row.semester_period?.split(' ').slice(0,2).join(' ')}</td>
                     <td className="py-2.5 pr-3 font-mono font-bold" style={{ color: scoreColor(row.score_total) }}>{Math.round(row.score_total)}%</td>
                     {[row.score_academic, row.score_sleep, row.score_emotional, row.score_social].map((s, i) => (
                       <td key={i} className="py-2.5 pr-3 font-mono text-xs text-text-muted">{Math.round(s)}%</td>

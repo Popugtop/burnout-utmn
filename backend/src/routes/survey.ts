@@ -23,11 +23,10 @@ router.get('/active', (req: Request, res: Response) => {
 // POST /api/survey/submit
 router.post('/submit', (req: Request, res: Response) => {
   const db = getDb();
-  const { survey_id, course_year, department, semester_period, answers } = req.body as {
+  const { survey_id, course_year, department, answers } = req.body as {
     survey_id: string;
     course_year: number;
     department: string;
-    semester_period: string;
     answers: Array<{ question_id: string; value: string }>;
   };
 
@@ -51,9 +50,9 @@ router.post('/submit', (req: Request, res: Response) => {
   `);
 
   const insertResponse = db.prepare(`
-    INSERT INTO responses (id, survey_id, course_year, department, semester_period,
+    INSERT INTO responses (id, survey_id, course_year, department,
       score_academic, score_sleep, score_emotional, score_social, score_total)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   // Pre-compute scores before the transaction so we can insert response first
@@ -70,7 +69,7 @@ router.post('/submit', (req: Request, res: Response) => {
   const transaction = db.transaction(() => {
     // Insert response FIRST so response_answers FK (response_id) is satisfied
     insertResponse.run(
-      responseId, survey_id, course_year, department, semester_period,
+      responseId, survey_id, course_year, department,
       scores.academic, scores.sleep, scores.emotional, scores.social, scores.total
     );
     for (const answer of answers) {

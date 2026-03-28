@@ -13,13 +13,12 @@ router.get('/count', (req: Request, res: Response) => {
 // GET /api/stats
 router.get('/', (req: Request, res: Response) => {
   const db = getDb();
-  const { year, department, period } = req.query;
+  const { year, department } = req.query;
 
   let where = 'WHERE 1=1';
   const params: (string | number)[] = [];
   if (year && year !== 'all') { where += ' AND course_year = ?'; params.push(Number(year)); }
   if (department && department !== 'all') { where += ' AND department = ?'; params.push(String(department)); }
-  if (period && period !== 'all') { where += ' AND semester_period = ?'; params.push(String(period)); }
 
   const total = (db.prepare(`SELECT COUNT(*) as count FROM responses ${where}`).get(...params) as { count: number }).count;
   const avgRow = db.prepare(`SELECT AVG(score_total) as avg FROM responses ${where}`).get(...params) as { avg: number };
@@ -36,12 +35,6 @@ router.get('/', (req: Request, res: Response) => {
     FROM responses ${where}
     GROUP BY course_year
     ORDER BY course_year ASC
-  `).all(...params);
-
-  const byPeriod = db.prepare(`
-    SELECT semester_period, AVG(score_total) as avg_total, COUNT(*) as count
-    FROM responses ${where}
-    GROUP BY semester_period
   `).all(...params);
 
   // Distribution
@@ -74,7 +67,6 @@ router.get('/', (req: Request, res: Response) => {
     distribution,
     byDepartment: byDept,
     byCourse,
-    byPeriod,
     categories,
   });
 });
@@ -82,12 +74,11 @@ router.get('/', (req: Request, res: Response) => {
 // GET /api/stats/heatmap
 router.get('/heatmap', (req: Request, res: Response) => {
   const db = getDb();
-  const { year, period } = req.query;
+  const { year } = req.query;
 
   let where = "WHERE department IS NOT NULL AND department != ''";
   const params: (string | number)[] = [];
   if (year && year !== 'all') { where += ' AND course_year = ?'; params.push(Number(year)); }
-  if (period && period !== 'all') { where += ' AND semester_period = ?'; params.push(String(period)); }
 
   const rows = db.prepare(`
     SELECT department,
