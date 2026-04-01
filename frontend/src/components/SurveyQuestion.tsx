@@ -6,13 +6,22 @@ interface Props {
   current: number;
   total: number;
   value: string;
+  lang: 'en' | 'ru';
   onChange: (val: string) => void;
   onNext: () => void;
   onPrev: () => void;
 }
 
-export default function SurveyQuestionUI({ question, current, total, value, onChange, onNext, onPrev }: Props) {
-  const choices: string[] = question.choices_json ? JSON.parse(question.choices_json) : [];
+export default function SurveyQuestionUI({ question, current, total, value, lang, onChange, onNext, onPrev }: Props) {
+  const ru = lang === 'ru';
+  const questionText = (ru && question.question_text_ru) || question.question_text;
+  const labelLow = (ru && question.scale_label_low_ru) || question.scale_label_low;
+  const labelHigh = (ru && question.scale_label_high_ru) || question.scale_label_high;
+  const choices: string[] = (() => {
+    if (ru && question.choices_json_ru) return JSON.parse(question.choices_json_ru);
+    if (question.choices_json) return JSON.parse(question.choices_json);
+    return [];
+  })();
 
   return (
     <motion.div
@@ -40,7 +49,7 @@ export default function SurveyQuestionUI({ question, current, total, value, onCh
 
       {/* Question */}
       <h2 className="font-display text-2xl font-semibold text-text-primary mb-8 leading-snug">
-        {question.question_text}
+        {questionText}
       </h2>
 
       {/* Answers */}
@@ -61,10 +70,10 @@ export default function SurveyQuestionUI({ question, current, total, value, onCh
               </button>
             ))}
           </div>
-          {(question.scale_label_low || question.scale_label_high) && (
+          {(labelLow || labelHigh) && (
             <div className="flex justify-between text-xs text-text-muted px-1">
-              <span>{question.scale_label_low}</span>
-              <span>{question.scale_label_high}</span>
+              <span>{labelLow}</span>
+              <span>{labelHigh}</span>
             </div>
           )}
         </div>

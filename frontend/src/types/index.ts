@@ -20,6 +20,10 @@ export interface SurveyQuestion {
   choices_json: string | null;
   is_inverted: number;
   scoring_map_json: string | null;
+  question_text_ru: string | null;
+  scale_label_low_ru: string | null;
+  scale_label_high_ru: string | null;
+  choices_json_ru: string | null;
 }
 
 export interface SurveyAnswer {

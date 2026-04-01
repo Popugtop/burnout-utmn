@@ -26,6 +26,10 @@ export default function QuestionEditor({ question, onSaved, onDeleted, onMoveUp,
     choices: question.choices_json ? (JSON.parse(question.choices_json) as string[]) : [''],
     scoring: question.scoring_map_json ? (JSON.parse(question.scoring_map_json) as Record<string, number>) : {},
     is_inverted: question.is_inverted === 1,
+    question_text_ru: question.question_text_ru || '',
+    scale_label_low_ru: question.scale_label_low_ru || '',
+    scale_label_high_ru: question.scale_label_high_ru || '',
+    choices_ru: question.choices_json_ru ? (JSON.parse(question.choices_json_ru) as string[]) : [],
   });
 
   async function save() {
@@ -42,6 +46,10 @@ export default function QuestionEditor({ question, onSaved, onDeleted, onMoveUp,
           choices_json: form.question_type === 'choice' ? JSON.stringify(form.choices) : null,
           is_inverted: form.is_inverted ? 1 : 0,
           scoring_map_json: form.question_type === 'choice' ? JSON.stringify(form.scoring) : null,
+          question_text_ru: form.question_text_ru || null,
+          scale_label_low_ru: form.scale_label_low_ru || null,
+          scale_label_high_ru: form.scale_label_high_ru || null,
+          choices_json_ru: form.question_type === 'choice' && form.choices_ru.length > 0 ? JSON.stringify(form.choices_ru) : null,
         }),
       });
       onSaved();
@@ -131,6 +139,42 @@ export default function QuestionEditor({ question, onSaved, onDeleted, onMoveUp,
                 className="text-accent text-xs hover:underline">+ Add choice</button>
             </div>
           )}
+
+          {/* Russian translations */}
+          <div className="border-t border-base-600 pt-4 space-y-3">
+            <p className="text-text-muted text-xs font-medium uppercase tracking-wide">Русский перевод (необязательно)</p>
+            <div>
+              <label className="block text-text-muted text-xs mb-1">Текст вопроса (RU)</label>
+              <textarea value={form.question_text_ru} onChange={e => setForm(f => ({ ...f, question_text_ru: e.target.value }))}
+                className="input resize-none" rows={2} placeholder="Введите перевод вопроса..." />
+            </div>
+            {form.question_type === 'scale_1_5' && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-text-muted text-xs mb-1">Низкая метка (RU)</label>
+                  <input value={form.scale_label_low_ru} onChange={e => setForm(f => ({ ...f, scale_label_low_ru: e.target.value }))}
+                    className="input" placeholder="напр. Никогда" />
+                </div>
+                <div>
+                  <label className="block text-text-muted text-xs mb-1">Высокая метка (RU)</label>
+                  <input value={form.scale_label_high_ru} onChange={e => setForm(f => ({ ...f, scale_label_high_ru: e.target.value }))}
+                    className="input" placeholder="напр. Всегда" />
+                </div>
+              </div>
+            )}
+            {form.question_type === 'choice' && (
+              <div>
+                <label className="block text-text-muted text-xs mb-2">Варианты ответов (RU) — в том же порядке</label>
+                {form.choices.map((_, ci) => (
+                  <div key={ci} className="mb-2">
+                    <input value={form.choices_ru[ci] || ''}
+                      onChange={e => setForm(f => { const c = [...f.choices_ru]; c[ci] = e.target.value; return { ...f, choices_ru: c }; })}
+                      className="input text-sm" placeholder={`Перевод: ${form.choices[ci] || `вариант ${ci + 1}`}`} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           <label className="flex items-center gap-3 cursor-pointer">
             <input type="checkbox" checked={form.is_inverted}

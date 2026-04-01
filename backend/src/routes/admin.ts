@@ -79,16 +79,19 @@ router.post('/surveys/:id/questions', (req: Request, res: Response) => {
     category: string; question_text: string; question_type: string;
     scale_label_low?: string; scale_label_high?: string;
     choices_json?: string; is_inverted?: number; scoring_map_json?: string;
+    question_text_ru?: string; scale_label_low_ru?: string; scale_label_high_ru?: string; choices_json_ru?: string;
   };
   const maxOrder = (db.prepare('SELECT MAX(order_index) as m FROM survey_questions WHERE survey_id = ?').get(req.params.id) as { m: number | null }).m || 0;
   const id = uuidv4();
   db.prepare(`
     INSERT INTO survey_questions (id, survey_id, order_index, category, question_text, question_type,
-      scale_label_low, scale_label_high, choices_json, is_inverted, scoring_map_json)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      scale_label_low, scale_label_high, choices_json, is_inverted, scoring_map_json,
+      question_text_ru, scale_label_low_ru, scale_label_high_ru, choices_json_ru)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(id, req.params.id, maxOrder + 1, body.category, body.question_text, body.question_type,
     body.scale_label_low || null, body.scale_label_high || null, body.choices_json || null,
-    body.is_inverted || 0, body.scoring_map_json || null);
+    body.is_inverted || 0, body.scoring_map_json || null,
+    body.question_text_ru || null, body.scale_label_low_ru || null, body.scale_label_high_ru || null, body.choices_json_ru || null);
   res.json({ id });
 });
 
@@ -98,6 +101,7 @@ router.put('/questions/:id', (req: Request, res: Response) => {
     category?: string; question_text?: string; question_type?: string;
     scale_label_low?: string; scale_label_high?: string;
     choices_json?: string; is_inverted?: number; scoring_map_json?: string;
+    question_text_ru?: string; scale_label_low_ru?: string; scale_label_high_ru?: string; choices_json_ru?: string;
   };
   db.prepare(`
     UPDATE survey_questions SET
@@ -108,12 +112,17 @@ router.put('/questions/:id', (req: Request, res: Response) => {
       scale_label_high = ?,
       choices_json = ?,
       is_inverted = COALESCE(?, is_inverted),
-      scoring_map_json = ?
+      scoring_map_json = ?,
+      question_text_ru = ?,
+      scale_label_low_ru = ?,
+      scale_label_high_ru = ?,
+      choices_json_ru = ?
     WHERE id = ?
   `).run(
     body.category || null, body.question_text || null, body.question_type || null,
     body.scale_label_low ?? null, body.scale_label_high ?? null, body.choices_json ?? null,
     body.is_inverted !== undefined ? body.is_inverted : null, body.scoring_map_json ?? null,
+    body.question_text_ru ?? null, body.scale_label_low_ru ?? null, body.scale_label_high_ru ?? null, body.choices_json_ru ?? null,
     req.params.id
   );
   res.json({ ok: true });

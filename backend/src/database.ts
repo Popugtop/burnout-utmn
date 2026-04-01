@@ -109,6 +109,17 @@ function initSchema() {
     try { database.exec(sql); } catch { /* column already exists */ }
   }
 
+  // Add Russian translation columns to survey_questions if they don't exist yet
+  const alterQColumns = [
+    `ALTER TABLE survey_questions ADD COLUMN question_text_ru TEXT`,
+    `ALTER TABLE survey_questions ADD COLUMN scale_label_low_ru TEXT`,
+    `ALTER TABLE survey_questions ADD COLUMN scale_label_high_ru TEXT`,
+    `ALTER TABLE survey_questions ADD COLUMN choices_json_ru TEXT`,
+  ];
+  for (const sql of alterQColumns) {
+    try { database.exec(sql); } catch { /* column already exists */ }
+  }
+
   // Tips table
   database.exec(`
     CREATE TABLE IF NOT EXISTS tips (

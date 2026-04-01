@@ -13,6 +13,20 @@ interface ActiveSurvey {
 
 const YEARS = ['1st', '2nd', '3rd', '4th', '5+'];
 
+function LangToggle({ lang, onChange }: { lang: 'en' | 'ru'; onChange: (l: 'en' | 'ru') => void }) {
+  return (
+    <div className="flex items-center gap-1 bg-base-800 border border-base-600 rounded-lg p-0.5">
+      {(['en', 'ru'] as const).map(l => (
+        <button key={l} onClick={() => onChange(l)}
+          className={`px-3 py-1 rounded text-sm font-medium uppercase tracking-wide transition-colors
+            ${lang === l ? 'bg-accent text-white' : 'text-text-muted hover:text-text-primary'}`}>
+          {l}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function Survey() {
   const { data, loading, error } = useApi<ActiveSurvey>('/api/survey/active');
   const navigate = useNavigate();
@@ -21,8 +35,12 @@ export default function Survey() {
   const [meta, setMeta] = useState({ course_year: '', department: '' });
   const [qIndex, setQIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [lang, setLang] = useState<'en' | 'ru'>('en');
 
   const metaValid = meta.course_year && meta.department;
+
+  // Check if any question has Russian translation
+  const hasRu = data?.questions.some(q => q.question_text_ru) ?? false;
 
   async function submit() {
     if (!data) return;
@@ -65,6 +83,13 @@ export default function Survey() {
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-2xl">
+        {/* Lang toggle — shown when Russian translations exist */}
+        {hasRu && (
+          <div className="flex justify-end mb-6">
+            <LangToggle lang={lang} onChange={setLang} />
+          </div>
+        )}
+
         <AnimatePresence mode="wait">
           {step === 'meta' && (
             <motion.div key="meta" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
@@ -73,7 +98,9 @@ export default function Survey() {
 
               <div className="space-y-6 mb-8">
                 <div>
-                  <label className="block text-text-secondary text-sm mb-2">What year are you in?</label>
+                  <label className="block text-text-secondary text-sm mb-2">
+                    {lang === 'ru' ? 'На каком курсе вы учитесь?' : 'What year are you in?'}
+                  </label>
                   <div className="flex flex-wrap gap-3">
                     {YEARS.map(y => (
                       <button key={y} onClick={() => setMeta(m => ({ ...m, course_year: y }))}
@@ -86,18 +113,19 @@ export default function Survey() {
                 </div>
 
                 <div>
-                  <label className="block text-text-secondary text-sm mb-2">Department / Institute</label>
+                  <label className="block text-text-secondary text-sm mb-2">
+                    {lang === 'ru' ? 'Институт / Подразделение' : 'Department / Institute'}
+                  </label>
                   <select value={meta.department} onChange={e => setMeta(m => ({ ...m, department: e.target.value }))}
                     className="input">
-                    <option value="">Select department...</option>
+                    <option value="">{lang === 'ru' ? 'Выберите институт...' : 'Select department...'}</option>
                     {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
                 </div>
-
               </div>
 
               <button onClick={() => setStep('questions')} disabled={!metaValid} className="btn-primary w-full py-4 text-lg disabled:opacity-40">
-                Start Survey
+                {lang === 'ru' ? 'Начать опрос' : 'Start Survey'}
               </button>
             </motion.div>
           )}
@@ -109,6 +137,7 @@ export default function Survey() {
               current={qIndex + 1}
               total={questions.length}
               value={answers[currentQ.id] || ''}
+              lang={lang}
               onChange={val => setAnswers(a => ({ ...a, [currentQ.id]: val }))}
               onNext={() => {
                 if (qIndex < questions.length - 1) setQIndex(i => i + 1);
@@ -124,7 +153,9 @@ export default function Survey() {
           {step === 'submitting' && (
             <motion.div key="submitting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20">
               <div className="text-4xl mb-4 animate-spin">⏳</div>
-              <p className="text-text-secondary font-mono">Processing your responses...</p>
+              <p className="text-text-secondary font-mono">
+                {lang === 'ru' ? 'Обрабатываем ответы...' : 'Processing your responses...'}
+              </p>
             </motion.div>
           )}
         </AnimatePresence>
