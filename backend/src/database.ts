@@ -170,6 +170,9 @@ function initSchema() {
   if (existingAdmins.cnt === 0) {
     seedDefaultAdmin(database);
   }
+
+  // Seed Russian translations for existing questions
+  seedRuTranslations(database);
 }
 
 export function resetDb(): void {
@@ -251,6 +254,87 @@ function seedDefaultAdmin(database: Database.Database) {
     'INSERT INTO admins (id, username, password_hash, display_name) VALUES (?, ?, ?, ?)'
   ).run(id, username, passwordHash, 'Administrator');
   console.log('⚠️  Default admin created. Change password immediately!');
+}
+
+function seedRuTranslations(database: Database.Database) {
+  const update = database.prepare(`
+    UPDATE survey_questions
+    SET question_text_ru = ?, scale_label_low_ru = ?, scale_label_high_ru = ?, choices_json_ru = ?
+    WHERE question_text = ? AND question_text_ru IS NULL
+  `);
+
+  const translations: Array<{ en: string; ru: string; low?: string; high?: string; choicesRu?: string[] }> = [
+    {
+      en: 'How often do you feel overwhelmed by academic tasks?',
+      ru: 'Как часто вы чувствуете себя перегруженным учебными задачами?',
+      low: 'Никогда', high: 'Всегда',
+    },
+    {
+      en: 'How many hours per day do you spend on studying outside of classes?',
+      ru: 'Сколько часов в день вы тратите на учёбу вне занятий?',
+      choicesRu: ['<1ч', '1-3ч', '3-5ч', '5-7ч', '7+ч'],
+    },
+    {
+      en: 'Do you feel that your efforts in studying are adequately rewarded?',
+      ru: 'Считаете ли вы, что ваши усилия в учёбе получают достаточную отдачу?',
+      low: 'Категорически нет', high: 'Полностью согласен(а)',
+    },
+    {
+      en: 'How many hours of sleep do you get on average?',
+      ru: 'Сколько часов вы спите в среднем за ночь?',
+      choicesRu: ['<4ч', '4-5ч', '5-6ч', '6-7ч', '7-8ч', '8+ч'],
+    },
+    {
+      en: 'How often do you feel physically exhausted during the day?',
+      ru: 'Как часто вы чувствуете физическое истощение в течение дня?',
+      low: 'Никогда', high: 'Всегда',
+    },
+    {
+      en: 'Do you have trouble falling asleep because of academic worries?',
+      ru: 'Бывает ли вам трудно заснуть из-за учебных переживаний?',
+      low: 'Никогда', high: 'Всегда',
+    },
+    {
+      en: 'How often do you feel emotionally drained after a study day?',
+      ru: 'Как часто вы чувствуете эмоциональное опустошение после учебного дня?',
+      low: 'Никогда', high: 'Всегда',
+    },
+    {
+      en: 'Do you feel detached or cynical about your studies?',
+      ru: 'Чувствуете ли вы отстранённость или безразличие к учёбе?',
+      low: 'Никогда', high: 'Всегда',
+    },
+    {
+      en: 'How often do you experience anxiety about upcoming deadlines or exams?',
+      ru: 'Как часто вы испытываете тревогу из-за предстоящих дедлайнов или экзаменов?',
+      low: 'Никогда', high: 'Всегда',
+    },
+    {
+      en: 'How often do you sacrifice social activities for studying?',
+      ru: 'Как часто вы жертвуете общением и досугом ради учёбы?',
+      low: 'Никогда', high: 'Всегда',
+    },
+    {
+      en: 'Do you feel you have enough time for hobbies and personal interests?',
+      ru: 'Считаете ли вы, что у вас достаточно времени на хобби и личные интересы?',
+      low: 'Категорически нет', high: 'Полностью согласен(а)',
+    },
+    {
+      en: 'How would you rate your overall well-being this semester?',
+      ru: 'Как вы оцениваете своё общее самочувствие в этом семестре?',
+      low: 'Очень плохо', high: 'Отлично',
+    },
+  ];
+
+  for (const t of translations) {
+    update.run(
+      t.ru,
+      t.low ?? null,
+      t.high ?? null,
+      t.choicesRu ? JSON.stringify(t.choicesRu) : null,
+      t.en
+    );
+  }
 }
 
 function seedDefaultSurvey(database: Database.Database) {
