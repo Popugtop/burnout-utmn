@@ -5,28 +5,18 @@ import { SurveyResult } from '../types';
 import BurnoutGauge from '../components/BurnoutGauge';
 import ScoreBar from '../components/ScoreBar';
 
-const TIPS_BY_SCORE: Record<string, string[]> = {
-  academic: [
-    'Try time-boxing with the Pomodoro technique (25 min work + 5 min break).',
-    'Use the Eisenhower Matrix to prioritize tasks by urgency and importance.',
-  ],
-  sleep: [
-    'Aim for 7-9 hours and keep a consistent sleep schedule, even on weekends.',
-    'Avoid screens for 30-60 minutes before bed to allow melatonin to kick in.',
-  ],
-  emotional: [
-    'Try journaling for 15 minutes a day to process stress and worries.',
-    'Practice 4-7-8 breathing: inhale 4s, hold 7s, exhale 8s.',
-  ],
-  social: [
-    'Schedule social activities like classes — treat them as non-negotiable.',
-    'Even 20 minutes of exercise a day significantly reduces anxiety and burnout.',
-  ],
-};
+interface Tip {
+  id: string;
+  category: string;
+  title: string;
+  body: string;
+  source?: string | null;
+}
 
 export default function Results() {
   const { id } = useParams<{ id: string }>();
   const { data, loading, error } = useApi<SurveyResult>(`/api/survey/results/${id}`);
+  const { data: allTips } = useApi<Tip[]>('/api/content/tips');
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
@@ -47,7 +37,20 @@ export default function Results() {
     { key: 'social', label: 'Social & Lifestyle', score: data.score_social },
   ];
 
+  // 2 worst categories
   const worst = [...categories].sort((a, b) => b.score - a.score).slice(0, 2);
+
+  // Pick up to 2 tips per worst category from DB
+  const tips = worst.flatMap(cat =>
+    (allTips ?? []).filter(t => t.category === cat.key).slice(0, 2)
+  );
+
+  const CATEGORY_LABELS: Record<string, string> = {
+    academic: 'Academic Load',
+    sleep: 'Sleep & Energy',
+    emotional: 'Emotional State',
+    social: 'Social & Lifestyle',
+  };
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-16">
@@ -68,20 +71,27 @@ export default function Results() {
           ))}
         </div>
 
-        {/* Tips */}
-        <div className="card p-6 mb-8">
-          <h2 className="font-display text-xl font-semibold mb-4">Personalized Tips</h2>
-          <div className="space-y-4">
-            {worst.flatMap(cat =>
-              TIPS_BY_SCORE[cat.key]?.map((tip, i) => (
-                <div key={`${cat.key}-${i}`} className="flex gap-3 p-4 bg-base-700 rounded-xl">
-                  <span className="text-accent mt-0.5">→</span>
-                  <p className="text-text-secondary text-sm leading-relaxed">{tip}</p>
+        {/* Tips from DB */}
+        {tips.length > 0 && (
+          <div className="card p-6 mb-8">
+            <h2 className="font-display text-xl font-semibold mb-1">Personalized Tips</h2>
+            <p className="text-text-muted text-sm mb-5">
+              Based on your highest scores in{' '}
+              {worst.map(c => CATEGORY_LABELS[c.key]).join(' and ')}
+            </p>
+            <div className="space-y-4">
+              {tips.map(tip => (
+                <div key={tip.id} className="p-4 bg-base-700 rounded-xl">
+                  <p className="text-text-primary text-sm font-semibold mb-1">{tip.title}</p>
+                  <p className="text-text-secondary text-sm leading-relaxed">{tip.body}</p>
+                  {tip.source && (
+                    <p className="text-text-muted text-xs italic mt-2">{tip.source}</p>
+                  )}
                 </div>
-              ))
-            )}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-4">

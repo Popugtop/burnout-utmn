@@ -42,7 +42,10 @@ export function computeCategoryScores(
   const sleep = avg(byCategory.sleep);
   const emotional = avg(byCategory.emotional);
   const social = avg(byCategory.social);
-  const total = avg([academic, sleep, emotional, social]);
+
+  // Total = simple average of all individual answers (not average of category averages)
+  const allScores = Object.values(byCategory).flat();
+  const total = avg(allScores);
 
   return { academic, sleep, emotional, social, total };
 }
